@@ -1,0 +1,60 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-color: #f5f5f5;
+    color: #222;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button {
+    border: none;
+    cursor: pointer;
+}
+
+.mobile-container {
+    width: 100%;
+    max-width: 430px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background-color: #ffffff;
+}
+.page {
+    min-height: 100vh;
+    padding: 24px 20px;
+}
+
+.page h1 {
+    margin: 0 0 12px;
+    font-size: 28px;
+}
+
+.page p {
+    margin: 0 0 24px;
+    font-size: 16px;
+    color: #666;
+}
+
+.page button {
+    width: 100%;
+    height: 52px;
+    border-radius: 16px;
+    background-color: #111;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+}
