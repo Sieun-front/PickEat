@@ -1,8 +1,36 @@
 import { useNavigate } from 'react-router-dom';
 import { Search, Map, Heart, User, UserPlus, ChevronRight } from 'lucide-react';
+import ReactGA from 'react-ga4';
 
 function Onboarding() {
     const navigate = useNavigate();
+
+    const handleLoginClick = () => {
+        ReactGA.event('login_click', {
+            page: 'onboarding',
+        });
+
+        navigate('/login');
+    };
+
+    const handleSignupClick = () => {
+        ReactGA.event('signup_click', {
+            page: 'onboarding',
+        });
+
+        navigate('/signup');
+    };
+
+    const handleGuestStart = () => {
+        localStorage.setItem('userMode', 'guest');
+
+        ReactGA.event('guest_start_click', {
+            page: 'onboarding',
+            user_mode: 'guest',
+        });
+
+        navigate('/home');
+    };
 
     return (
         <main className="flex h-screen flex-col overflow-hidden bg-[radial-gradient(circle_at_50%_32%,#FFF4E8_0%,#FFFCF8_45%,#FFFFFF_100%)] px-7 pb-5 pt-10 text-center">
@@ -46,19 +74,25 @@ function Onboarding() {
             <section className="mt-20">
                 <section className="flex flex-col gap-2">
                     <button
-                        onClick={() => navigate('/login')}
+                        onClick={handleLoginClick}
                         className="flex h-[52px] w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-b from-[#FF650D] to-[#FF4800] text-[18px] font-extrabold text-white"
                     >
                         <User size={22} />
                         로그인
                     </button>
 
-                    <button className="flex h-[52px] w-full items-center justify-center gap-3 rounded-2xl border-[1.5px] border-[#FF5A0A] bg-white text-[18px] font-extrabold text-[#FF5A0A]">
+                    <button
+                        onClick={handleSignupClick}
+                        className="flex h-[52px] w-full items-center justify-center gap-3 rounded-2xl border-[1.5px] border-[#FF5A0A] bg-white text-[18px] font-extrabold text-[#FF5A0A]"
+                    >
                         <UserPlus size={22} />
                         회원가입
                     </button>
 
-                    <button className="flex h-[52px] w-full items-center justify-center gap-1 rounded-2xl bg-[#FFF2E8] text-[15px] font-extrabold text-[#222] ">
+                    <button
+                        onClick={handleGuestStart}
+                        className="flex h-[52px] w-full items-center justify-center gap-1 rounded-2xl bg-[#FFF2E8] text-[15px] font-extrabold text-[#222]"
+                    >
                         회원가입 없이 시작하기
                         <ChevronRight size={18} />
                     </button>

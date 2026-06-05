@@ -1,12 +1,23 @@
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, User, LockKeyhole, UserPlus } from 'lucide-react';
+import ReactGA from 'react-ga4';
 
 function Login() {
     const navigate = useNavigate();
-    const handleLogin = (e) => {
+
+    const handleLoginSubmit = (e) => {
         e.preventDefault();
+
+        localStorage.setItem('userMode', 'login');
+
+        ReactGA.event('login_submit', {
+            page: 'login',
+            user_mode: 'login',
+        });
+
         navigate('/home');
     };
+
     return (
         <main className="flex h-screen flex-col overflow-hidden bg-[radial-gradient(circle_at_50%_32%,#FFF4E8_0%,#FFFCF8_45%,#FFFFFF_100%)] px-7 pb-5 pt-8 text-left">
             <button onClick={() => navigate('/')} className="absolute left-5 top-10 text-[#111]">
@@ -30,7 +41,7 @@ function Login() {
                 </div>
             </section>
 
-            <form className="mt-1" onSubmit={handleLogin}>
+            <form className="mt-1" onSubmit={handleLoginSubmit}>
                 <label className="block text-[13px] font-extrabold text-[#222]">
                     아이디
                     <div className="mt-2 flex h-[50px] items-center gap-3 rounded-2xl border border-[#DDD7D2] bg-white px-4 text-[#AAA]">
