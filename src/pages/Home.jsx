@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Utensils, Heart, MapPin, Users } from 'lucide-react';
 import ReactGA from 'react-ga4';
+import { useNavigate } from 'react-router-dom';
 
 function Home() {
     const [diningType, setDiningType] = useState(null);
     const [foodType, setFoodType] = useState(null);
     const [mood, setMood] = useState(null);
     const [distance, setDistance] = useState(null);
-
+    const navigate = useNavigate();
     const baseMoodOptions = ['조용한', '트렌디한', '데이트', '가성비', '인테리어 맛집', '특별한 날'];
 
     const moodOptions = baseMoodOptions.filter((option) => {
@@ -46,14 +47,15 @@ function Home() {
             mood,
             distance,
         });
-
         console.log({
             diningType,
             foodType,
             mood,
             distance,
             userMode,
-        });
+        }); // ga 이벤트 전송
+
+        navigate('/loading');
     };
 
     return (
@@ -95,6 +97,7 @@ function Home() {
                 options={['한식', '양식', '일식', '중식', '분식', '카페/디저트', '주류', '아무거나']}
                 selectedValue={foodType}
                 onSelect={handleFoodTypeSelect}
+                disabled={!diningType}
             />
 
             <OptionSection
@@ -103,6 +106,7 @@ function Home() {
                 options={moodOptions}
                 selectedValue={mood}
                 onSelect={setMood}
+                disabled={!foodType}
             />
 
             <OptionSection
@@ -112,6 +116,7 @@ function Home() {
                 selectedValue={distance}
                 onSelect={setDistance}
                 fixedGrid
+                disabled={!mood}
             />
 
             <button
@@ -128,7 +133,16 @@ function Home() {
         </main>
     );
 }
-function OptionSection({ icon, title, options, selectedValue, onSelect, twoColumns = false, fixedGrid = false }) {
+function OptionSection({
+    icon,
+    title,
+    options,
+    selectedValue,
+    onSelect,
+    twoColumns = false,
+    fixedGrid = false,
+    disabled = false,
+}) {
     const layoutClass = fixedGrid
         ? 'grid grid-cols-4 gap-2'
         : twoColumns
@@ -136,24 +150,33 @@ function OptionSection({ icon, title, options, selectedValue, onSelect, twoColum
         : 'flex flex-wrap gap-2';
 
     const buttonClass = (isSelected) => {
-        const baseClass = 'h-[42px] rounded-2xl text-[15px] font-extrabold shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]';
-
         const sizeClass = fixedGrid ? 'w-full px-1 text-[13px]' : 'px-6';
 
-        const colorClass = isSelected
-            ? 'bg-gradient-to-b from-[#FF761A] to-[#FF4F00] font-black text-white shadow-[0_8px_16px_rgba(255,96,0,0.2)]'
-            : 'bg-[#F7F7F7] text-[#444]';
+        if (disabled) {
+            return `h-[42px] rounded-2xl bg-[#F1F1F1] ${sizeClass} text-[15px] font-extrabold text-[#B8B8B8]`;
+        }
 
-        return `${baseClass} ${sizeClass} ${colorClass}`;
+        return isSelected
+            ? `h-[42px] rounded-2xl bg-gradient-to-b from-[#FF761A] to-[#FF4F00] ${sizeClass} text-[15px] font-black text-white shadow-[0_8px_16px_rgba(255,96,0,0.2)]`
+            : `h-[42px] rounded-2xl bg-[#F7F7F7] ${sizeClass} text-[15px] font-extrabold text-[#444] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]`;
     };
 
     return (
         <section className="border-b border-[#eee] py-3">
             <div className="mb-3 flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#FF6A13] text-[#FF6A13]">
+                <div
+                    className={
+                        disabled
+                            ? 'flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#DDD] text-[#BBB]'
+                            : 'flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#FF6A13] text-[#FF6A13]'
+                    }
+                >
                     {icon}
                 </div>
-                <h3 className="text-[19px] font-black text-[#222]">{title}</h3>
+
+                <h3 className={disabled ? 'text-[19px] font-black text-[#BBB]' : 'text-[19px] font-black text-[#222]'}>
+                    {title}
+                </h3>
             </div>
 
             <div className={layoutClass}>
@@ -164,6 +187,7 @@ function OptionSection({ icon, title, options, selectedValue, onSelect, twoColum
                         <button
                             key={option}
                             type="button"
+                            disabled={disabled}
                             onClick={() => onSelect(option)}
                             className={buttonClass(isSelected)}
                         >
@@ -175,5 +199,4 @@ function OptionSection({ icon, title, options, selectedValue, onSelect, twoColum
         </section>
     );
 }
-
 export default Home;
