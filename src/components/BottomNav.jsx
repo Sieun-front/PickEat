@@ -1,4 +1,4 @@
-import { Home, Bookmark, User } from 'lucide-react';
+import { Home, Bookmark, User, Sparkles } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 function BottomNav() {
@@ -7,31 +7,19 @@ function BottomNav() {
 
     const tabs = [
         { label: '홈', path: '/home', icon: Home },
+        { label: 'AI 추천', path: '/recommend', icon: Sparkles },
         { label: '저장', path: '/saved', icon: Bookmark },
-        { label: '마이', path: '/mypage', icon: User },
+        { label: 'My', path: '/mypage', icon: User },
     ];
 
     const handleTabClick = (path) => {
-        if (path === '/home') {
-            const hasResult = localStorage.getItem('hasRecommendationResult');
-
-            if (hasResult === 'true') {
-                navigate('/result');
-                return;
-            }
-        }
-
         navigate(path);
     };
 
     return (
-        <nav className="fixed bottom-0 left-1/2 z-20 grid h-[72px] w-full max-w-[430px] -translate-x-1/2 grid-cols-3 border-t border-[#eee] bg-white">
+        <nav className="fixed bottom-0 left-1/2 z-20 grid h-[72px] w-full max-w-[430px] -translate-x-1/2 grid-cols-4 border-t border-[#eee] bg-white">
             {tabs.map((tab) => {
-                const isActive =
-                    tab.path === '/home'
-                        ? location.pathname === '/home' || location.pathname === '/result'
-                        : location.pathname === tab.path;
-
+                const isActive = location.pathname === tab.path;
                 const Icon = tab.icon;
 
                 return (

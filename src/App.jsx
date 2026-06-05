@@ -7,6 +7,8 @@ import Loading from './pages/Loading';
 import Result from './pages/Result';
 import Saved from './pages/Saved';
 import Mypage from './pages/Mypage';
+import Recommend from './pages/Recommend';
+import RecentResult from './pages/RecentResult';
 
 import ReactGA from 'react-ga4';
 ReactGA.initialize('G-PFXDZ4GXRX');
@@ -35,6 +37,8 @@ function App() {
                     <Route path="/result" element={<Result />} />
                     <Route path="/saved" element={<Saved />} />
                     <Route path="/mypage" element={<Mypage />} />
+                    <Route path="/recommend" element={<Recommend />} />
+                    <Route path="/recent" element={<RecentResult />} />
                 </Routes>
             </div>
         </BrowserRouter>

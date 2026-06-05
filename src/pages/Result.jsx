@@ -52,7 +52,7 @@ function Result() {
             user_mode: userMode || 'unknown',
         });
 
-        navigate('/home');
+        navigate('/recommend');
     };
 
     const handleDetailClick = (restaurant) => {
