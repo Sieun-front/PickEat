@@ -3,28 +3,55 @@ import { Utensils, Heart, MapPin, Users } from 'lucide-react';
 import ReactGA from 'react-ga4';
 
 function Home() {
-    const [foodType, setFoodType] = useState('한식');
-    const [mood, setMood] = useState('리뷰 좋은');
-    const [distance, setDistance] = useState('도보 5분');
-    const [diningType, setDiningType] = useState('갈밥');
+    const [diningType, setDiningType] = useState(null);
+    const [foodType, setFoodType] = useState(null);
+    const [mood, setMood] = useState(null);
+    const [distance, setDistance] = useState(null);
+
+    const baseMoodOptions = ['조용한', '트렌디한', '데이트', '가성비', '인테리어 맛집', '특별한 날'];
+
+    const moodOptions = baseMoodOptions.filter((option) => {
+        if (diningType === '혼밥' && ['데이트', '특별한 날'].includes(option)) {
+            return false;
+        }
+
+        return true;
+    });
+
+    const isComplete = diningType && foodType && mood && distance;
+
+    const handleDiningTypeSelect = (value) => {
+        setDiningType(value);
+        setMood(null);
+    };
+
+    const handleFoodTypeSelect = (value) => {
+        setFoodType(value);
+        setMood(null);
+    };
 
     const handleRecommendClick = () => {
+        if (!isComplete) {
+            alert('모든 조건을 선택해주세요!');
+            return;
+        }
+
         const userMode = localStorage.getItem('userMode') || 'unknown';
 
         ReactGA.event('recommendation_request', {
             page: 'home',
             user_mode: userMode,
+            dining_type: diningType,
             food_type: foodType,
             mood,
             distance,
-            dining_type: diningType,
         });
 
         console.log({
+            diningType,
             foodType,
             mood,
             distance,
-            diningType,
             userMode,
         });
     };
@@ -54,17 +81,26 @@ function Home() {
             </section>
 
             <OptionSection
+                icon={<Users size={19} />}
+                title="식사 상황"
+                options={['혼밥', '같밥']}
+                selectedValue={diningType}
+                onSelect={handleDiningTypeSelect}
+                twoColumns
+            />
+
+            <OptionSection
                 icon={<Utensils size={18} />}
                 title="음식 종류"
-                options={['한식', '양식', '일식', '중식', '분식', '카페/디저트', '아무거나']}
+                options={['한식', '양식', '일식', '중식', '분식', '카페/디저트', '주류', '아무거나']}
                 selectedValue={foodType}
-                onSelect={setFoodType}
+                onSelect={handleFoodTypeSelect}
             />
 
             <OptionSection
                 icon={<Heart size={18} />}
                 title="분위기"
-                options={['조용한', '트렌디한', '데이트', '가성비', '인테리어 맛집', '특별한 날', '술 한 잔']}
+                options={moodOptions}
                 selectedValue={mood}
                 onSelect={setMood}
             />
@@ -75,28 +111,42 @@ function Home() {
                 options={['도보 5분', '10분', '15분', '상관없음']}
                 selectedValue={distance}
                 onSelect={setDistance}
-            />
-
-            <OptionSection
-                icon={<Users size={19} />}
-                title="식사 상황"
-                options={['혼밥', '갈밥']}
-                selectedValue={diningType}
-                onSelect={setDiningType}
-                twoColumns
+                fixedGrid
             />
 
             <button
                 onClick={handleRecommendClick}
-                className="mt-5 h-[58px] w-full rounded-[24px] bg-gradient-to-b from-[#FF761A] to-[#FF4F00] text-[20px] font-black text-white shadow-[0_12px_24px_rgba(255,96,0,0.22)]"
+                disabled={!isComplete}
+                className={
+                    isComplete
+                        ? 'mt-5 h-[58px] w-full rounded-[24px] bg-gradient-to-b from-[#FF761A] to-[#FF4F00] text-[20px] font-black text-white shadow-[0_12px_24px_rgba(255,96,0,0.22)]'
+                        : 'mt-5 h-[58px] w-full rounded-[24px] bg-[#D9D9D9] text-[20px] font-black text-white'
+                }
             >
                 ✨ AI 추천받기
             </button>
         </main>
     );
 }
+function OptionSection({ icon, title, options, selectedValue, onSelect, twoColumns = false, fixedGrid = false }) {
+    const layoutClass = fixedGrid
+        ? 'grid grid-cols-4 gap-2'
+        : twoColumns
+        ? 'grid grid-cols-2 gap-2'
+        : 'flex flex-wrap gap-2';
 
-function OptionSection({ icon, title, options, selectedValue, onSelect, twoColumns = false }) {
+    const buttonClass = (isSelected) => {
+        const baseClass = 'h-[42px] rounded-2xl text-[15px] font-extrabold shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]';
+
+        const sizeClass = fixedGrid ? 'w-full px-1 text-[13px]' : 'px-6';
+
+        const colorClass = isSelected
+            ? 'bg-gradient-to-b from-[#FF761A] to-[#FF4F00] font-black text-white shadow-[0_8px_16px_rgba(255,96,0,0.2)]'
+            : 'bg-[#F7F7F7] text-[#444]';
+
+        return `${baseClass} ${sizeClass} ${colorClass}`;
+    };
+
     return (
         <section className="border-b border-[#eee] py-3">
             <div className="mb-3 flex items-center gap-2">
@@ -106,7 +156,7 @@ function OptionSection({ icon, title, options, selectedValue, onSelect, twoColum
                 <h3 className="text-[19px] font-black text-[#222]">{title}</h3>
             </div>
 
-            <div className={twoColumns ? 'grid grid-cols-2 gap-2' : 'flex flex-wrap gap-2'}>
+            <div className={layoutClass}>
                 {options.map((option) => {
                     const isSelected = selectedValue === option;
 
@@ -115,11 +165,7 @@ function OptionSection({ icon, title, options, selectedValue, onSelect, twoColum
                             key={option}
                             type="button"
                             onClick={() => onSelect(option)}
-                            className={
-                                isSelected
-                                    ? 'h-[42px] rounded-2xl bg-gradient-to-b from-[#FF761A] to-[#FF4F00] px-6 text-[15px] font-black text-white shadow-[0_8px_16px_rgba(255,96,0,0.2)]'
-                                    : 'h-[42px] rounded-2xl bg-[#F7F7F7] px-6 text-[15px] font-extrabold text-[#444] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]'
-                            }
+                            className={buttonClass(isSelected)}
                         >
                             {option}
                         </button>
