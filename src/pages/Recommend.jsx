@@ -1,19 +1,40 @@
-import { useState } from 'react';
-import { Utensils, Heart, MapPin, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Utensils, Heart, MapPin, Users, ChevronLeft } from 'lucide-react';
 import ReactGA from 'react-ga4';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
+import { getKeywords } from '../api/restaurantApi';
 
 function Recommend() {
     const [diningType, setDiningType] = useState(null);
     const [foodType, setFoodType] = useState(null);
     const [mood, setMood] = useState(null);
     const [distance, setDistance] = useState(null);
-    const navigate = useNavigate();
-    const baseMoodOptions = ['조용한', '트렌디한', '데이트', '가성비', '인테리어 맛집', '특별한 날'];
 
-    const moodOptions = baseMoodOptions.filter((option) => {
-        if (diningType === '혼밥' && ['데이트', '특별한 날'].includes(option)) {
+    const [keywordOptions, setKeywordOptions] = useState({
+        food_types: [],
+        moods: [],
+        distances: [],
+        meal_situations: [],
+    });
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchKeywords = async () => {
+            try {
+                const data = await getKeywords();
+                setKeywordOptions(data);
+            } catch (error) {
+                console.error('키워드 옵션 조회 실패:', error);
+                alert('추천 옵션을 불러오지 못했습니다.');
+            }
+        };
+
+        fetchKeywords();
+    }, []);
+
+    const moodOptions = keywordOptions.moods.filter((option) => {
+        if (diningType === '혼밥' && option === '데이트') {
             return false;
         }
 
@@ -41,21 +62,27 @@ function Recommend() {
         const userMode = localStorage.getItem('userMode') || 'unknown';
 
         ReactGA.event('recommendation_request', {
-            page: 'home',
+            page: 'recommend',
             user_mode: userMode,
             dining_type: diningType,
             food_type: foodType,
             mood,
             distance,
         });
-        console.log({
-            diningType,
-            foodType,
-            mood,
-            distance,
-            userMode,
-        }); // ga 이벤트 전송
 
+        localStorage.setItem(
+            'recommendationConditions',
+            JSON.stringify({
+                diningType,
+                foodType,
+                mood,
+                distance,
+                userMode,
+            })
+        );
+
+        localStorage.removeItem('recommendations');
+        localStorage.removeItem('hasRetried');
         navigate('/loading');
     };
 
@@ -64,6 +91,7 @@ function Recommend() {
             <button onClick={() => navigate('/home')} className="absolute left-5 top-10 text-[#111]">
                 <ChevronLeft size={30} />
             </button>
+
             <header className="text-center">
                 <h1 className="text-[28px] font-black tracking-[-1px] text-[#FF5A0A]">PickEat</h1>
             </header>
@@ -89,7 +117,7 @@ function Recommend() {
             <OptionSection
                 icon={<Users size={19} />}
                 title="식사 상황"
-                options={['혼밥', '같밥']}
+                options={keywordOptions.meal_situations}
                 selectedValue={diningType}
                 onSelect={handleDiningTypeSelect}
                 twoColumns
@@ -98,7 +126,7 @@ function Recommend() {
             <OptionSection
                 icon={<Utensils size={18} />}
                 title="음식 종류"
-                options={['한식', '양식', '일식', '중식', '분식', '카페/디저트', '주류', '아무거나']}
+                options={keywordOptions.food_types}
                 selectedValue={foodType}
                 onSelect={handleFoodTypeSelect}
                 disabled={!diningType}
@@ -116,7 +144,7 @@ function Recommend() {
             <OptionSection
                 icon={<MapPin size={18} />}
                 title="거리"
-                options={['도보 5분', '10분', '15분', '상관없음']}
+                options={keywordOptions.distances}
                 selectedValue={distance}
                 onSelect={setDistance}
                 fixedGrid
@@ -137,6 +165,7 @@ function Recommend() {
         </main>
     );
 }
+
 function OptionSection({
     icon,
     title,
@@ -203,4 +232,5 @@ function OptionSection({
         </section>
     );
 }
+
 export default Recommend;

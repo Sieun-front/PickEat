@@ -1,21 +1,36 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, User, LockKeyhole, UserPlus } from 'lucide-react';
 import ReactGA from 'react-ga4';
+import { login } from '../api/authApi';
 
 function Login() {
     const navigate = useNavigate();
 
-    const handleLoginSubmit = (e) => {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+
+    const handleLoginSubmit = async (e) => {
         e.preventDefault();
 
-        localStorage.setItem('userMode', 'login');
+        try {
+            const data = await login({ username, password });
 
-        ReactGA.event('login_submit', {
-            page: 'login',
-            user_mode: 'login',
-        });
+            localStorage.setItem('access', data.access);
+            localStorage.setItem('refresh', data.refresh);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('userMode', 'login');
 
-        navigate('/home');
+            ReactGA.event('login_submit', {
+                page: 'login',
+                user_mode: 'login',
+            });
+
+            navigate('/home');
+        } catch (error) {
+            console.error('로그인 실패:', error);
+            alert('아이디 또는 비밀번호를 확인해주세요.');
+        }
     };
 
     return (
@@ -26,15 +41,12 @@ function Login() {
 
             <section className="pt-10 text-center">
                 <h1 className="text-[28px] font-black tracking-[-1px] text-[#FF4F00]">PickEat</h1>
-
                 <h2 className="mt-3 text-[26px] font-black tracking-[-1px] text-[#222]">어서오세요! 👋</h2>
-
                 <p className="mt-1 text-[14px] font-medium text-[#666]">로그인하고 나만의 맛집을 저장해보세요.</p>
 
                 <div className="relative mt-1 h-[145px]">
                     <span className="absolute left-16 top-14 text-2xl text-[#FF9B2F]">✦</span>
                     <span className="absolute right-16 top-8 text-2xl text-[#FF9B2F]">✦</span>
-
                     <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-[88px] drop-shadow-[0_18px_16px_rgba(161,80,23,0.18)]">
                         🍔
                     </div>
@@ -48,6 +60,8 @@ function Login() {
                         <User size={20} />
                         <input
                             type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
                             placeholder="아이디를 입력해주세요"
                             className="w-full bg-transparent text-[15px] text-[#222] outline-none placeholder:text-[#B8B8B8]"
                         />
@@ -60,6 +74,8 @@ function Login() {
                         <LockKeyhole size={19} />
                         <input
                             type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             placeholder="비밀번호를 입력해주세요"
                             className="w-full bg-transparent text-[15px] text-[#222] outline-none placeholder:text-[#B8B8B8]"
                         />
@@ -80,7 +96,16 @@ function Login() {
                 <div className="h-px flex-1 bg-[#DDD]" />
             </div>
 
-            <button className="h-[50px] w-full rounded-2xl border-[1.5px] border-[#FF5A0A] bg-white text-[17px] font-extrabold text-[#FF5A0A]">
+            <button
+                onClick={() => {
+                    ReactGA.event('move_to_signup_from_login', {
+                        page: 'login',
+                    });
+
+                    navigate('/signup');
+                }}
+                className="h-[50px] w-full rounded-2xl border-[1.5px] border-[#FF5A0A] bg-white text-[17px] font-extrabold text-[#FF5A0A]"
+            >
                 회원가입
             </button>
 

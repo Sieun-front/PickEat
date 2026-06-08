@@ -1,11 +1,27 @@
 import BottomNav from '../components/BottomNav';
+import { useNavigate } from 'react-router-dom';
 
 function Mypage() {
+    const navigate = useNavigate();
     const userMode = localStorage.getItem('userMode');
-    const nickname = localStorage.getItem('nickname');
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    const nickname = user?.nickname;
 
     const displayName = userMode === 'guest' ? '배고픈 픽잇러' : nickname || '픽잇러';
+    const handleLogout = () => {
+        localStorage.removeItem('access');
+        localStorage.removeItem('refresh');
+        localStorage.removeItem('user');
+        localStorage.removeItem('recommendations');
+        localStorage.removeItem('selectedRestaurant');
+        localStorage.removeItem('hasRecommendationResult');
+        localStorage.removeItem('hasRetried');
 
+        localStorage.setItem('userMode', 'guest');
+
+        navigate('/');
+    };
     return (
         <main className="min-h-screen bg-white px-6 pb-24 pt-10">
             <h1 className="text-center text-[28px] font-black text-[#FF5A0A]">마이페이지</h1>
@@ -31,6 +47,12 @@ function Mypage() {
                 <MenuCard title="최근 추천 기록" emoji="🕒" />
                 <MenuCard title="계정 설정" emoji="⚙️" />
             </section>
+            <button
+                onClick={handleLogout}
+                className="mt-6 h-[50px] w-full rounded-2xl bg-[#F1F1F1] text-[16px] font-black text-[#555]"
+            >
+                로그아웃
+            </button>
 
             {userMode === 'guest' && (
                 <section className="mt-8 rounded-[24px] border border-[#FFE0C7] bg-[#FFF9F4] p-5">
@@ -57,7 +79,6 @@ function MenuCard({ title, emoji }) {
     return (
         <button className="flex items-center gap-4 rounded-[20px] border border-[#EEE] bg-white p-5 text-left shadow-sm">
             <span className="text-2xl">{emoji}</span>
-
             <span className="text-[16px] font-black text-[#222]">{title}</span>
         </button>
     );

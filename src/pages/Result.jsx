@@ -3,50 +3,47 @@ import { useNavigate } from 'react-router-dom';
 import BottomNav from '../components/BottomNav';
 import ReactGA from 'react-ga4';
 
-const restaurants = [
-    {
-        id: 1,
-        name: '한성 닭한마리',
-        image: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?q=80&w=600',
-        tags: '한식  |  도보 7분  |  같이 먹기 좋음',
-        reason: '따뜻한 국물, 높은 리뷰 만족도, 여럿이 먹기 좋은 메뉴라 추천해요.',
-    },
-    {
-        id: 2,
-        name: '정성서울국수집',
-        image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?q=80&w=600',
-        tags: '한식  |  도보 5분  |  혼밥 가능',
-        reason: '빠르게 먹기 좋고 혼밥 리뷰가 많아요.',
-    },
-    {
-        id: 3,
-        name: '키부키',
-        image: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?q=80&w=600',
-        tags: '일식  |  도보 8분  |  분위기 좋음',
-        reason: '조용한 분위기와 깔끔한 메뉴 구성이 좋아요.',
-    },
-];
-
 function Result() {
     const navigate = useNavigate();
 
+    const [restaurants, setRestaurants] = useState([]);
     const [hasRetried, setHasRetried] = useState(false);
 
     const userMode = localStorage.getItem('userMode');
-    const nickname = localStorage.getItem('nickname');
+    const user = JSON.parse(localStorage.getItem('user'));
+    const nickname = user?.nickname;
 
     const displayName = userMode === 'guest' ? '배고픈 픽잇러' : nickname || '픽잇러';
 
     useEffect(() => {
+        const savedRecommendations = localStorage.getItem('recommendations');
+
+        if (!savedRecommendations) {
+            alert('추천 결과가 없습니다. 다시 추천을 받아주세요.');
+            navigate('/recommend', { replace: true });
+            return;
+        }
+
+        const parsedRecommendations = JSON.parse(savedRecommendations);
+        setRestaurants(parsedRecommendations);
+
+        const retryStatus = localStorage.getItem('hasRetried');
+
+        if (retryStatus === 'true') {
+            setHasRetried(true);
+        }
+
         localStorage.setItem('hasRecommendationResult', 'true');
 
         ReactGA.event('recommendation_result_view', {
             page: 'result',
             user_mode: userMode || 'unknown',
         });
-    }, [userMode]);
+    }, [navigate, userMode]);
 
     const handleBackToOptions = () => {
+        localStorage.removeItem('hasRetried');
+
         ReactGA.event('back_to_options_click', {
             page: 'result',
             user_mode: userMode || 'unknown',
@@ -62,17 +59,26 @@ function Result() {
             restaurant_name: restaurant.name,
             user_mode: userMode || 'unknown',
         });
+
+        localStorage.setItem('selectedRestaurant', JSON.stringify(restaurant));
+
+        alert('상세보기 페이지는 준비 중이에요!');
     };
 
     const handleRetryRecommend = () => {
+        if (hasRetried) return;
+
         ReactGA.event('recommendation_retry_click', {
             page: 'result',
             user_mode: userMode || 'unknown',
         });
 
         setHasRetried(true);
+        localStorage.setItem('hasRetried', 'true');
 
-        alert('다시 추천 기능은 준비 중이에요!');
+        localStorage.removeItem('recommendations');
+
+        navigate('/loading');
     };
 
     return (
@@ -95,7 +101,7 @@ function Result() {
                 <h2 className="text-[29px] font-black leading-tight tracking-[-2px] text-[#111]">
                     {displayName}님에게 딱 맞는
                     <br />
-                    추천 맛집 <span className="text-[#FF5A0A]">3곳</span> ✨
+                    추천 맛집 <span className="text-[#FF5A0A]">{restaurants.length}곳</span> ✨
                 </h2>
             </section>
 
@@ -106,20 +112,22 @@ function Result() {
                         className="relative rounded-[24px] bg-white p-3 shadow-[0_8px_24px_rgba(0,0,0,0.08)] ring-1 ring-[#F0F0F0]"
                     >
                         <div className="absolute left-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-b from-[#FF761A] to-[#FF4F00] text-[22px] font-black text-white">
-                            {restaurant.id}
+                            {restaurant.rank}
                         </div>
 
                         <div className="flex gap-4">
                             <img
-                                src={restaurant.image}
+                                src={restaurant.picture}
                                 alt={restaurant.name}
                                 className="h-[140px] w-[140px] shrink-0 rounded-2xl object-cover"
+                                onError={(e) => {
+                                    e.currentTarget.src =
+                                        'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600';
+                                }}
                             />
 
                             <div className="flex flex-1 flex-col">
                                 <h3 className="mt-2 text-[21px] font-black text-[#111]">{restaurant.name}</h3>
-
-                                <p className="mt-2 text-[13px] font-bold leading-5 text-[#777]">{restaurant.tags}</p>
 
                                 <div className="mt-8">
                                     <strong className="text-[14px] font-black text-[#FF5A0A]">AI 추천 이유</strong>

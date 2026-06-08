@@ -1,22 +1,56 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, User, LockKeyhole, Mail, UserPlus } from 'lucide-react';
+import { ChevronLeft, User, LockKeyhole, UserPlus } from 'lucide-react';
 import ReactGA from 'react-ga4';
+import { register } from '../api/authApi'; // 경로 확인
 
 function Signup() {
     const navigate = useNavigate();
 
-    const handleSignup = (e) => {
+    const [username, setUsername] = useState('');
+    const [nickname, setNickname] = useState('');
+    const [password, setPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleSignup = async (e) => {
         e.preventDefault();
+        setErrorMessage('');
 
-        localStorage.setItem('userMode', 'login');
+        if (!username || !nickname || !password) {
+            setErrorMessage('아이디, 닉네임, 비밀번호를 모두 입력해주세요.');
+            return;
+        }
 
-        ReactGA.event('signup_submit', {
-            page: 'signup',
-            user_mode: 'login',
-        });
+        try {
+            setIsLoading(true);
 
-        navigate('/home');
+            const data = await register({
+                username,
+                nickname,
+                password,
+            });
+
+            localStorage.setItem('accessToken', data.access);
+            localStorage.setItem('refreshToken', data.refresh);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('userMode', 'login');
+
+            ReactGA.event('signup_submit', {
+                page: 'signup',
+                user_mode: 'login',
+                user_id: data.user.id,
+            });
+
+            navigate('/home');
+        } catch (error) {
+            console.error(error);
+            setErrorMessage('회원가입에 실패했습니다. 이미 사용 중인 아이디일 수 있어요.');
+        } finally {
+            setIsLoading(false);
+        }
     };
+
     const handleMoveToLogin = () => {
         ReactGA.event('move_to_login_from_signup', {
             page: 'signup',
@@ -24,6 +58,7 @@ function Signup() {
 
         navigate('/login');
     };
+
     return (
         <main className="flex h-screen flex-col overflow-hidden bg-[radial-gradient(circle_at_50%_32%,#FFF4E8_0%,#FFFCF8_45%,#FFFFFF_100%)] px-7 pb-5 pt-8 text-left">
             <button onClick={() => navigate('/')} className="absolute left-5 top-10 text-[#111]">
@@ -54,6 +89,8 @@ function Signup() {
                         <User size={20} />
                         <input
                             type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
                             placeholder="아이디를 입력해주세요"
                             className="w-full bg-transparent text-[15px] text-[#222] outline-none placeholder:text-[#B8B8B8]"
                         />
@@ -61,12 +98,14 @@ function Signup() {
                 </label>
 
                 <label className="mt-3 block text-[13px] font-extrabold text-[#222]">
-                    이메일
+                    닉네임
                     <div className="mt-2 flex h-[48px] items-center gap-3 rounded-2xl border border-[#DDD7D2] bg-white px-4 text-[#AAA]">
-                        <Mail size={20} />
+                        <UserPlus size={20} />
                         <input
-                            type="email"
-                            placeholder="이메일을 입력해주세요"
+                            type="text"
+                            value={nickname}
+                            onChange={(e) => setNickname(e.target.value)}
+                            placeholder="닉네임을 입력해주세요"
                             className="w-full bg-transparent text-[15px] text-[#222] outline-none placeholder:text-[#B8B8B8]"
                         />
                     </div>
@@ -78,32 +117,35 @@ function Signup() {
                         <LockKeyhole size={19} />
                         <input
                             type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             placeholder="비밀번호를 입력해주세요"
                             className="w-full bg-transparent text-[15px] text-[#222] outline-none placeholder:text-[#B8B8B8]"
                         />
                     </div>
                 </label>
 
+                {errorMessage && <p className="mt-3 text-center text-[13px] font-bold text-red-500">{errorMessage}</p>}
+
                 <button
                     type="submit"
-                    className="mt-5 flex h-[50px] w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-[#FF650D] to-[#FF4800] text-[17px] font-extrabold text-white"
+                    disabled={isLoading}
+                    className="mt-5 flex h-[50px] w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-[#FF650D] to-[#FF4800] text-[17px] font-extrabold text-white disabled:opacity-60"
                 >
                     <UserPlus size={21} />
-                    회원가입
+                    {isLoading ? '가입 중...' : '회원가입'}
                 </button>
             </form>
 
             <button
-                onClick={() => navigate('/login')}
+                onClick={handleMoveToLogin}
                 className="mt-3 h-[50px] w-full rounded-2xl border-[1.5px] border-[#FF5A0A] bg-white text-[16px] font-extrabold text-[#FF5A0A]"
             >
                 이미 계정이 있어요
             </button>
 
             <p className="mt-3 text-center text-[12px] leading-5 text-[#777]">
-                지금은 포트폴리오용 임시 회원가입입니다.
-                <br />
-                입력 정보는 서버에 저장되지 않아요.
+                회원가입 후 바로 PickEat을 이용할 수 있어요.
             </p>
         </main>
     );
