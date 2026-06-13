@@ -7,8 +7,26 @@ import ReactGA from 'react-ga4';
 function Saved() {
     const [savedRestaurants, setSavedRestaurants] = useState([]);
 
+    const userMode = localStorage.getItem('userMode');
+    const isLogin = userMode === 'login';
+
     useEffect(() => {
-        const fetchMyPicks = async () => {
+        const fetchSavedRestaurants = async () => {
+            if (!isLogin) {
+                const localSavedRestaurants = JSON.parse(localStorage.getItem('savedRestaurants') || '[]');
+
+                setSavedRestaurants(localSavedRestaurants);
+
+                ReactGA.event('saved_page_view', {
+                    page: 'saved',
+                    user_mode: userMode || 'guest',
+                    save_type: 'local',
+                    saved_count: localSavedRestaurants.length,
+                });
+
+                return;
+            }
+
             try {
                 const data = await getMyPicks();
                 const results = data.results || [];
@@ -17,6 +35,8 @@ function Saved() {
 
                 ReactGA.event('saved_page_view', {
                     page: 'saved',
+                    user_mode: userMode || 'unknown',
+                    save_type: 'server',
                     saved_count: data.count || results.length,
                 });
             } catch (error) {
@@ -25,10 +45,28 @@ function Saved() {
             }
         };
 
-        fetchMyPicks();
-    }, []);
+        fetchSavedRestaurants();
+    }, [isLogin, userMode]);
 
     const handleUnsaveClick = async (restaurant) => {
+        if (!isLogin) {
+            const updatedSavedRestaurants = savedRestaurants.filter((item) => item.naver_id !== restaurant.naver_id);
+
+            localStorage.setItem('savedRestaurants', JSON.stringify(updatedSavedRestaurants));
+            setSavedRestaurants(updatedSavedRestaurants);
+
+            ReactGA.event('saved_restaurant_unsave_click', {
+                page: 'saved',
+                save_type: 'local',
+                restaurant_id: restaurant.id,
+                restaurant_name: restaurant.name,
+                naver_id: restaurant.naver_id,
+                user_mode: userMode || 'guest',
+            });
+
+            return;
+        }
+
         try {
             await unsaveRestaurant(restaurant.naver_id);
 
@@ -36,9 +74,11 @@ function Saved() {
 
             ReactGA.event('saved_restaurant_unsave_click', {
                 page: 'saved',
+                save_type: 'server',
                 restaurant_id: restaurant.id,
                 restaurant_name: restaurant.name,
                 naver_id: restaurant.naver_id,
+                user_mode: userMode || 'unknown',
             });
         } catch (error) {
             console.error('저장 취소 실패:', error);
@@ -52,6 +92,7 @@ function Saved() {
             restaurant_id: restaurant.id,
             restaurant_name: restaurant.name,
             naver_id: restaurant.naver_id,
+            user_mode: userMode || 'unknown',
         });
 
         window.open(`https://map.naver.com/p/entry/place/${restaurant.naver_id}`, '_blank');
@@ -68,6 +109,13 @@ function Saved() {
                 <h2 className="text-[29px] font-black tracking-[-2px] text-[#111]">
                     저장한 맛집 <span className="text-[#FF5A0A]">{savedRestaurants.length}곳</span>
                 </h2>
+
+                {!isLogin && (
+                    <p className="mt-3 rounded-2xl bg-[#FFF2E8] px-4 py-3 text-[13px] font-semibold leading-5 text-[#FF5A0A]">
+                        로그인하지 않아도 저장 기능을 사용할 수 있어요. 단, 브라우저 데이터가 삭제되면 저장 목록도
+                        사라질 수 있어요.
+                    </p>
+                )}
             </section>
 
             <section className="mt-5 flex flex-col gap-4 px-5">

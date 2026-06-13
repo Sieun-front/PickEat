@@ -1,5 +1,6 @@
 import BottomNav from '../components/BottomNav';
 import { useNavigate } from 'react-router-dom';
+import ReactGA from 'react-ga4';
 
 function Mypage() {
     const navigate = useNavigate();
@@ -9,6 +10,15 @@ function Mypage() {
     const nickname = user?.nickname;
 
     const displayName = userMode === 'guest' ? '배고픈 픽잇러' : nickname || '픽잇러';
+    const handleGuestSignupClick = () => {
+        ReactGA.event('guest_signup_click', {
+            page: 'mypage',
+            user_mode: userMode || 'unknown',
+            source: 'mypage_signup_card',
+        });
+
+        navigate('/signup');
+    };
     const handleLogout = () => {
         localStorage.removeItem('access');
         localStorage.removeItem('refresh');
@@ -58,8 +68,10 @@ function Mypage() {
                         <br />
                         회원가입하면 언제든 저장한 맛집을 확인할 수 있어요.
                     </p>
-
-                    <button className="mt-4 h-[48px] w-full rounded-2xl bg-gradient-to-b from-[#FF761A] to-[#FF4F00] text-[16px] font-black text-white">
+                    <button
+                        onClick={handleGuestSignupClick}
+                        className="mt-4 h-[48px] w-full rounded-2xl bg-gradient-to-b from-[#FF761A] to-[#FF4F00] text-[16px] font-black text-white"
+                    >
                         회원가입 하기
                     </button>
                 </section>
