@@ -23,9 +23,9 @@ function Mypage() {
         localStorage.removeItem('access');
         localStorage.removeItem('refresh');
         localStorage.removeItem('user');
-        localStorage.removeItem('recommendations');
+
         localStorage.removeItem('selectedRestaurant');
-        localStorage.removeItem('hasRecommendationResult');
+
         localStorage.removeItem('hasRetried');
 
         localStorage.setItem('userMode', 'guest');
