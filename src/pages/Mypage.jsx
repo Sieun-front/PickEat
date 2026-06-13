@@ -52,12 +52,14 @@ function Mypage() {
                 </div>
             </section>
 
-            <button
-                onClick={handleLogout}
-                className="mt-6 h-[50px] w-full rounded-2xl bg-[#F1F1F1] text-[16px] font-black text-[#555]"
-            >
-                로그아웃
-            </button>
+            {userMode !== 'guest' && (
+                <button
+                    onClick={handleLogout}
+                    className="mt-6 h-[50px] w-full rounded-2xl bg-[#F1F1F1] text-[16px] font-black text-[#555]"
+                >
+                    로그아웃
+                </button>
+            )}
 
             {userMode === 'guest' && (
                 <section className="mt-8 rounded-[24px] border border-[#FFE0C7] bg-[#FFF9F4] p-5">

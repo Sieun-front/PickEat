@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { MapPin, Star } from 'lucide-react';
+import { MapPin, Bookmark, BookmarkCheck, Navigation } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import ReactGA from 'react-ga4';
 
@@ -8,9 +8,17 @@ function RecentResult() {
 
     useEffect(() => {
         const savedRecommendations = localStorage.getItem('recommendations');
+        const savedRestaurants = JSON.parse(localStorage.getItem('savedRestaurants') || '[]');
 
         if (savedRecommendations) {
-            setRecentRestaurants(JSON.parse(savedRecommendations));
+            const recommendations = JSON.parse(savedRecommendations);
+
+            const recommendationsWithSavedStatus = recommendations.map((restaurant) => ({
+                ...restaurant,
+                is_saved: savedRestaurants.some((saved) => saved.naver_id === restaurant.naver_id),
+            }));
+
+            setRecentRestaurants(recommendationsWithSavedStatus);
         }
 
         ReactGA.event('recent_result_view', {
@@ -19,17 +27,53 @@ function RecentResult() {
         });
     }, []);
 
-    const handleRestaurantClick = (restaurant) => {
-        const userMode = localStorage.getItem('userMode') || 'unknown';
+    const handleSaveClick = (restaurant) => {
+        const savedRestaurants = JSON.parse(localStorage.getItem('savedRestaurants') || '[]');
 
-        ReactGA.event('recent_restaurant_click', {
+        const isAlreadySaved = savedRestaurants.some((item) => item.naver_id === restaurant.naver_id);
+
+        const updatedSavedRestaurants = isAlreadySaved
+            ? savedRestaurants.filter((item) => item.naver_id !== restaurant.naver_id)
+            : [
+                  ...savedRestaurants,
+                  {
+                      ...restaurant,
+                      is_saved: true,
+                  },
+              ];
+
+        localStorage.setItem('savedRestaurants', JSON.stringify(updatedSavedRestaurants));
+
+        setRecentRestaurants((prev) =>
+            prev.map((item) =>
+                item.naver_id === restaurant.naver_id
+                    ? {
+                          ...item,
+                          is_saved: !isAlreadySaved,
+                      }
+                    : item
+            )
+        );
+
+        ReactGA.event(isAlreadySaved ? 'recent_restaurant_unsave_click' : 'recent_restaurant_save_click', {
             page: 'recent',
-            user_mode: userMode,
+            user_mode: localStorage.getItem('userMode') || 'unknown',
             restaurant_id: restaurant.id,
             restaurant_name: restaurant.name,
+            naver_id: restaurant.naver_id,
+        });
+    };
+
+    const handleNaverMapClick = (restaurant) => {
+        ReactGA.event('recent_naver_map_click', {
+            page: 'recent',
+            user_mode: localStorage.getItem('userMode') || 'unknown',
+            restaurant_id: restaurant.id,
+            restaurant_name: restaurant.name,
+            naver_id: restaurant.naver_id,
         });
 
-        localStorage.setItem('selectedRestaurant', JSON.stringify(restaurant));
+        window.open(`https://map.naver.com/p/entry/place/${restaurant.naver_id}`, '_blank');
     };
 
     return (
@@ -47,10 +91,9 @@ function RecentResult() {
                     </div>
                 ) : (
                     recentRestaurants.map((restaurant) => (
-                        <button
+                        <article
                             key={restaurant.id}
-                            onClick={() => handleRestaurantClick(restaurant)}
-                            className="flex items-center justify-between rounded-[22px] border border-[#EEE] bg-white p-5 text-left shadow-[0_8px_22px_rgba(0,0,0,0.05)]"
+                            className="rounded-[22px] border border-[#EEE] bg-white p-5 shadow-[0_8px_22px_rgba(0,0,0,0.05)]"
                         >
                             <div>
                                 <h2 className="text-[20px] font-black text-[#222]">{restaurant.name}</h2>
@@ -67,13 +110,34 @@ function RecentResult() {
                                 </p>
                             </div>
 
-                            <div className="flex items-center gap-1 rounded-full bg-[#FFF2E8] px-3 py-1 text-[#FF5A0A]">
-                                <Star size={14} fill="currentColor" />
-                                <span className="text-[13px] font-black">
-                                    {restaurant.is_saved ? '저장됨' : '추천'}
-                                </span>
+                            <div className="mt-4 flex items-center justify-end gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => handleSaveClick(restaurant)}
+                                    className={
+                                        restaurant.is_saved
+                                            ? 'flex h-10 w-10 items-center justify-center rounded-xl bg-[#FFF2E8] text-[#FF5A0A]'
+                                            : 'flex h-10 w-10 items-center justify-center rounded-xl border border-[#EAEAEA] text-[#666] transition hover:bg-[#F8F8F8]'
+                                    }
+                                    aria-label={`${restaurant.name} 저장하기`}
+                                >
+                                    {restaurant.is_saved ? (
+                                        <BookmarkCheck size={18} fill="currentColor" />
+                                    ) : (
+                                        <Bookmark size={18} />
+                                    )}
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => handleNaverMapClick(restaurant)}
+                                    className="flex h-10 items-center gap-1 rounded-xl bg-[#FF5A0A] px-4 text-[14px] font-black text-white"
+                                >
+                                    <Navigation size={15} />
+                                    길찾기
+                                </button>
                             </div>
-                        </button>
+                        </article>
                     ))
                 )}
             </section>

@@ -48,7 +48,7 @@ function Onboarding() {
                 </h2>
 
                 <p className="mt-2 text-[15px] font-medium leading-6 text-[#666]">
-                    맛잘알 AI가 당신의 취향과 상황에 딱 맞는
+                    맛잘알 AI가 외대생의 취향과 상황에 딱 맞는
                     <br />
                     맛집을 추천해드려요!
                 </p>

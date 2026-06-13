@@ -33,7 +33,7 @@ function Home() {
             <section className="mt-8 rounded-[30px] bg-[#FFF3EA] p-6">
                 <div className="flex items-center gap-2 text-[#FF5A0A]">
                     <MapPin size={20} />
-                    <span className="text-[14px] font-black">현재 위치 기반 추천</span>
+                    <span className="text-[14px] font-black">외대생 생활반경</span>
                 </div>
 
                 <h2 className="mt-5 text-[30px] font-black leading-tight tracking-[-2px] text-[#111]">

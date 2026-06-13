@@ -143,11 +143,21 @@ function Saved() {
                                             'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600';
                                     }}
                                 />
-
                                 <div className="flex flex-1 flex-col justify-between">
-                                    <h3 className="mt-2 text-[21px] font-black text-[#111]">{restaurant.name}</h3>
+                                    <div>
+                                        <h3 className="mt-2 text-[21px] font-black text-[#111]">{restaurant.name}</h3>
 
-                                    <div className="flex items-center justify-end gap-2">
+                                        <div className="mt-3">
+                                            <strong className="text-[13px] font-black text-[#FF5A0A]">
+                                                AI 추천 이유
+                                            </strong>
+                                            <p className="mt-1 text-[13px] font-semibold leading-5 text-[#666]">
+                                                {restaurant.reason || '추천 이유가 저장되지 않았어요.'}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-4 flex items-center justify-end gap-2">
                                         <button
                                             type="button"
                                             onClick={() => handleUnsaveClick(restaurant)}
@@ -165,7 +175,7 @@ function Saved() {
                                             길찾기
                                         </button>
                                     </div>
-                                </div>
+                                </div>{' '}
                             </div>
                         </article>
                     ))
