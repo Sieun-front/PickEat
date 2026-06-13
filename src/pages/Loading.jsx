@@ -21,23 +21,19 @@ function Loading() {
                 }
 
                 const conditions = JSON.parse(savedConditions);
+                const excludedNaverIds = JSON.parse(localStorage.getItem('excludedNaverIds') || '[]');
 
                 const payload = {
                     food_types: [conditions.foodType],
                     moods: [conditions.mood],
                     distance: conditions.distance,
                     meal_situation: conditions.diningType,
+                    excluded_naver_ids: excludedNaverIds,
                 };
 
                 console.log('추천 요청 payload:', payload);
 
-                const data = await getRecommendations({
-                    diningType: conditions.diningType,
-                    foodType: conditions.foodType,
-                    mood: conditions.mood,
-                    distance: conditions.distance,
-                });
-
+                const data = await getRecommendations(payload);
                 localStorage.setItem('recommendations', JSON.stringify(data.recommendations || []));
                 localStorage.setItem('hasRecommendationResult', 'true');
 

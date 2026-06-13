@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, User, LockKeyhole, UserPlus } from 'lucide-react';
 import ReactGA from 'react-ga4';
-import { register } from '../api/authApi'; // 경로 확인
+import { register } from '../api/authApi';
 
 function Signup() {
     const navigate = useNavigate();
@@ -17,7 +17,11 @@ function Signup() {
         e.preventDefault();
         setErrorMessage('');
 
-        if (!username || !nickname || !password) {
+        const trimmedUsername = username.trim();
+        const trimmedNickname = nickname.trim();
+        const trimmedPassword = password.trim();
+
+        if (!trimmedUsername || !trimmedNickname || !trimmedPassword) {
             setErrorMessage('아이디, 닉네임, 비밀번호를 모두 입력해주세요.');
             return;
         }
@@ -26,26 +30,42 @@ function Signup() {
             setIsLoading(true);
 
             const data = await register({
-                username,
-                nickname,
-                password,
+                username: trimmedUsername,
+                nickname: trimmedNickname,
+                password: trimmedPassword,
             });
 
-            localStorage.setItem('accessToken', data.access);
-            localStorage.setItem('refreshToken', data.refresh);
+            console.log('회원가입 응답:', data);
+            console.log('실제 저장된 username:', data.user?.username);
+            console.log('실제 저장된 nickname:', data.user?.nickname);
+
+            localStorage.setItem('access', data.access);
+            localStorage.setItem('refresh', data.refresh);
             localStorage.setItem('user', JSON.stringify(data.user));
             localStorage.setItem('userMode', 'login');
 
             ReactGA.event('signup_submit', {
                 page: 'signup',
                 user_mode: 'login',
-                user_id: data.user.id,
+                user_id: data.user?.id,
             });
 
             navigate('/home');
         } catch (error) {
-            console.error(error);
-            setErrorMessage('회원가입에 실패했습니다. 이미 사용 중인 아이디일 수 있어요.');
+            console.error('회원가입 실패 상태:', error.response?.status);
+            console.error('회원가입 실패 응답:', error.response?.data);
+
+            const serverError = error.response?.data;
+
+            if (serverError?.username) {
+                setErrorMessage(`아이디: ${serverError.username[0]}`);
+            } else if (serverError?.nickname) {
+                setErrorMessage(`닉네임: ${serverError.nickname[0]}`);
+            } else if (serverError?.password) {
+                setErrorMessage(`비밀번호: ${serverError.password[0]}`);
+            } else {
+                setErrorMessage('회원가입에 실패했습니다. 이미 사용 중인 아이디일 수 있어요.');
+            }
         } finally {
             setIsLoading(false);
         }

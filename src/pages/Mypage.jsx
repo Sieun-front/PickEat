@@ -42,11 +42,6 @@ function Mypage() {
                 </div>
             </section>
 
-            <section className="mt-6 flex flex-col gap-3">
-                <MenuCard title="저장한 맛집" emoji="🔖" />
-                <MenuCard title="최근 추천 기록" emoji="🕒" />
-                <MenuCard title="계정 설정" emoji="⚙️" />
-            </section>
             <button
                 onClick={handleLogout}
                 className="mt-6 h-[50px] w-full rounded-2xl bg-[#F1F1F1] text-[16px] font-black text-[#555]"

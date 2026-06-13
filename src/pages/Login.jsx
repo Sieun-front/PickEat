@@ -28,7 +28,8 @@ function Login() {
 
             navigate('/home');
         } catch (error) {
-            console.error('로그인 실패:', error);
+            console.error('로그인 실패 상태:', error.response?.status);
+            console.error('로그인 실패 응답:', error.response?.data);
             alert('아이디 또는 비밀번호를 확인해주세요.');
         }
     };
