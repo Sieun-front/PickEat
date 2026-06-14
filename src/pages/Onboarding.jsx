@@ -39,7 +39,7 @@ function Onboarding() {
     };
 
     return (
-        <main className="flex h-screen flex-col overflow-hidden bg-[radial-gradient(circle_at_50%_32%,#FFF4E8_0%,#FFFCF8_45%,#FFFFFF_100%)] px-7 pb-5 pt-10 text-center">
+        <main className="flex h-screen flex-col overflow-y-auto bg-[radial-gradient(circle_at_50%_32%,#FFF4E8_0%,#FFFCF8_45%,#FFFFFF_100%)] px-7 pb-5 pt-10 text-center">
             <section className="mt-10">
                 <h1 className="text-[40px] font-black tracking-[-2px] text-[#FF4F00]">PickEat</h1>
 
