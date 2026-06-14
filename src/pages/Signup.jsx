@@ -80,8 +80,12 @@ function Signup() {
     };
 
     return (
-        <main className="flex h-screen flex-col overflow-hidden bg-[radial-gradient(circle_at_50%_32%,#FFF4E8_0%,#FFFCF8_45%,#FFFFFF_100%)] px-7 pb-5 pt-8 text-left">
-            <button onClick={() => navigate('/')} className="absolute left-5 top-10 text-[#111]">
+        <main className="mx-auto flex min-h-screen max-w-[430px] flex-col overflow-hidden bg-[radial-gradient(circle_at_50%_32%,#FFF4E8_0%,#FFFCF8_45%,#FFFFFF_100%)] px-7 pb-5 pt-8 text-left">
+            <button
+                type="button"
+                onClick={() => navigate('/')}
+                className="mb-2 flex h-10 w-10 items-center justify-center text-[#111]"
+            >
                 <ChevronLeft size={30} />
             </button>
 
