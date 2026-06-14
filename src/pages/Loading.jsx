@@ -43,14 +43,14 @@ function Loading() {
                 console.error('상태 코드:', error.response?.status);
                 console.error('서버 응답:', error.response?.data);
 
-                const savedRecommendations = localStorage.getItem('recommendations');
+                const serverMessage = error.response?.data?.error;
 
-                if (savedRecommendations) {
-                    navigate('/result', { replace: true });
-                    return;
+                if (serverMessage) {
+                    alert(serverMessage);
+                } else {
+                    alert('추천을 불러오지 못했습니다. 다른 조건으로 다시 선택해주세요.');
                 }
 
-                alert('추천을 불러오지 못했습니다. 다른 조건으로 다시 선택해주세요.');
                 navigate('/recommend', { replace: true });
             }
         };
