@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getRecommendations } from '../api/restaurantApi';
+import ReactGA from 'react-ga4';
 
 function Loading() {
     const navigate = useNavigate();
@@ -34,6 +35,12 @@ function Loading() {
                 console.log('추천 요청 payload:', payload);
 
                 const data = await getRecommendations(payload);
+                ReactGA.event('recommendation_success', {
+                    page: 'loading',
+                    result_count: data.recommendations?.length || 0,
+                    user_mode: conditions.userMode || 'unknown',
+                });
+
                 localStorage.setItem('recommendations', JSON.stringify(data.recommendations || []));
                 localStorage.setItem('hasRecommendationResult', 'true');
 
@@ -42,7 +49,11 @@ function Loading() {
                 console.error('AI 추천 요청 실패:', error);
                 console.error('상태 코드:', error.response?.status);
                 console.error('서버 응답:', error.response?.data);
-
+                ReactGA.event('recommendation_fail', {
+                    page: 'loading',
+                    status_code: error.response?.status || 'unknown',
+                    error_message: error.response?.data?.error || 'unknown',
+                });
                 const serverMessage = error.response?.data?.error;
 
                 if (serverMessage) {
