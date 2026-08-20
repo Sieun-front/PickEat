@@ -1,16 +1,48 @@
-# React + Vite
+# PICK EAT 🍽️
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+메뉴 선택의 피로를 줄이고, 사용자의 조건에 맞는 맛집을 추천하는 서비스입니다.
 
-Currently, two official plugins are available:
+## 📝 프로젝트 소개
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+음식점 정보가 부족해서가 아니라,
+수많은 선택지 속에서 메뉴를 결정하는 과정 자체가 피로하다는 문제에서 시작했습니다.
 
-## React Compiler
+음식 종류, 분위기, 거리 등 최소한의 조건만 선택하면
+AI가 맞춤 맛집을 추천하고, 네이버 지도로 바로 이동할 수 있도록 설계했습니다.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🎯 주요 기능
 
-## Expanding the ESLint configuration
+-   음식 종류 / 분위기 / 거리 기반 맛집 추천
+-   AI 기반 맞춤 맛집 추천
+-   네이버 지도 연동
+-   비회원 이용 지원
+-   추천 결과 저장
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 📊 데이터 기반 UX 개선
+
+GA 데이터를 통해 추천 과정의 이탈 구간을 분석했습니다.
+
+-   추천 화면 → 로딩 화면: 89% 전환
+-   로딩 화면 → 결과 화면: 52% 전ㅏ
+
+긴 대기 시간 동안 사용자가 진행 상황을 인지하기 어렵다는 문제를 발견하고,
+로딩 애니메이션과 단계별 메시지를 추가해 대기 경험을 개선했습니다.
+
+이후 사용성 검증을 통해 개선된 로딩 UX에 대한 사용자 반응을 확인했습니다.
+
+## 🛠️ Tech Stack
+
+-   React
+-   JavaScript
+-   Tailwind CSS
+-   GA4
+-   Figma
+
+## 👩🏻‍💻 My Role
+
+-   사용자 시나리오 및 문제 정의
+-   UX/UI 설계
+-   프론트엔드 개발
+-   AI 추천 기능 설계
+-   GA4 이벤트 설계 및 데이터 분석
+-   사용성 검증 및 UX 개선
